@@ -1,10 +1,11 @@
 import os
 from flask import Flask, render_template, request, jsonify
 import requests
-from google import genai
+import google.generativeai as genai
 
 app = Flask(__name__)
-client = genai.Client()
+
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 @app.route("/")
 def home():
@@ -18,10 +19,8 @@ def search():
     prompt = f"The user remembers this lyric or sound: '{lyrics}'. Tell me the song name and artist in format 'Song Name - Artist'. If unsure, give the most probable name. Do not write anything else."
     
     try:
-        ai_response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt
-        )
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        ai_response = model.generate_content(prompt)
         search_query = ai_response.text.strip()
     except:
         search_query = lyrics
